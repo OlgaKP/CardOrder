@@ -20,12 +20,12 @@ public class CardOrderTest {
 
     @BeforeAll
     static void setUpAll() {
-        WebDriverManager.chromedriver().setup();
+        WebDriverManager.chromedriver().setup(); // не надо качивать драйвер и вкладывать в отдельную папку
     }
 
     @BeforeEach
     void setUp() {
-        ChromeOptions options = new ChromeOptions();
+        ChromeOptions options = new ChromeOptions(); // режим headless-отключаем графический интерфейс
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--no-sandbox");
         options.addArguments("--headless");
@@ -49,9 +49,66 @@ public class CardOrderTest {
         driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("Ян Гэ");
         driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+78001112233");
         driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
-        driver.findElement(By.tagName("button")).click();
-        String text = driver.findElement(By.className("paragraph_theme_alfa-on-white")).getText().trim();
+        driver.findElement(By.cssSelector("button")).click();
+//        String text = driver.findElement(By.className("paragraph_theme_alfa-on-white")).getText().trim();
+        String text = driver.findElement(By.cssSelector(".paragraph_theme_alfa-on-white")).getText().trim();
         String expected = "Ваша заявка успешно отправлена! Наш менеджер свяжется с вами в ближайшее время.";
+        assertEquals(expected, text);
+    }
+
+    @Test
+    void shouldSendFormWithoutName() throws InterruptedException {
+        driver.get("http://localhost:9999");
+        driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+78001112233");
+        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        String text = driver.findElement(By.cssSelector(".input_invalid [class='input__sub']")).getText().trim();
+        String expected = "Поле обязательно для заполнения";
+        assertEquals(expected, text);
+    }
+
+    @Test
+    void shouldSendFormWithoutPhone() throws InterruptedException {
+        driver.get("http://localhost:9999");
+        driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("Ян Гэ");
+        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        String text = driver.findElement(By.cssSelector(".input_invalid [class='input__sub']")).getText().trim();
+        String expected = "Поле обязательно для заполнения";
+        assertEquals(expected, text);
+    }
+
+    @Test
+    void shouldSendFormWithoutAll() throws InterruptedException {
+        driver.get("http://localhost:9999");
+        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        String text = driver.findElement(By.cssSelector(".input_invalid [class='input__sub']")).getText().trim();
+        String expected = "Поле обязательно для заполнения";
+        assertEquals(expected, text);
+    }
+
+    @Test
+    void shouldSendFormOnEnglishName() throws InterruptedException {
+        driver.get("http://localhost:9999");
+        driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("Yan Lee");
+        driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+78001112233");
+        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        String text = driver.findElement(By.cssSelector(".input_invalid [class='input__sub']")).getText().trim();
+        String expected = "Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.";
+        assertEquals(expected, text);
+    }
+
+    @Test
+    void shouldSendFormWithPartPhone() throws InterruptedException {
+        driver.get("http://localhost:9999");
+        driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("Ян Гэ");
+        driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+7800111");
+        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        String text = driver.findElement(By.cssSelector(".input_invalid [class='input__sub']")).getText().trim();
+        String expected = "Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.";
         assertEquals(expected, text);
     }
 }
