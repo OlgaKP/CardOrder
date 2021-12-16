@@ -43,6 +43,18 @@ public class CardOrderTest {
 //        textFields.get(0).sendKeys("Ян Гэ");
 //        textFields.get(1).sendKeys("+78001112233");
 //        driver.findElement(By.className("checkbox__box")).click();
+        driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("Ян Гэ");
+        driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+78001112233");
+        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        String text = driver.findElement(By.cssSelector("[data-test-id='order-success']")).getText().trim();
+        String expected = "Ваша заявка успешно отправлена! Наш менеджер свяжется с вами в ближайшее время.";
+        assertEquals(expected, text);
+    }
+
+    @Test
+    void shouldSendSuccessfulFormWithHyphen() {
+        driver.get("http://localhost:9999");
         driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("Ян Гэ-Ли");
         driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+78001112233");
         driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
